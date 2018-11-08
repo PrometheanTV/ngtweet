@@ -275,15 +275,17 @@ function TwitterWidget(ngTweetLogger, TwitterWidgetFactory) {
             scope.$watch('twitterWidgetId', function(newValue, oldValue) {
                 ngTweetLogger.debug('Linking', element, attrs);
                 var twitterWidgetOptions = scope.$eval(attrs.twitterWidgetOptions);
-                if (oldValue !== undefined && newValue !== oldValue) { //replacing, clear node.
-                    angular.element(element[0]).empty();
-                }
                 if (!angular.isUndefined(scope.twitterWidgetId)) {
                     if (!angular.isString(scope.twitterWidgetId)) {
                         ngTweetLogger.warn('twitterWidgetId should probably be a string due to loss of precision.');
                     }
-                    TwitterWidgetFactory.createTweet(scope.twitterWidgetId, element[0], twitterWidgetOptions).then(function success(embed) {
-                        ngTweetLogger.debug('Created tweet widget: ', scope.twitterWidgetId, element);
+                    var elementCopy = element.clone();
+                    TwitterWidgetFactory.createTweet(scope.twitterWidgetId, elementCopy[0], twitterWidgetOptions).then(function success(embed) {
+                        ngTweetLogger.debug('Created tweet widget: ', scope.twitterWidgetId, elementCopy[0]);
+
+                        element.empty();
+                        element.append(elementCopy[0]);
+
                         scope.twitterWidgetOnRendered();
                     }).catch(function creationError(message) {
                         ngTweetLogger.error('Could not create widget: ', message, element);
